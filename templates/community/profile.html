@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ user.username }}'s Profile</title>
+</head>
+<body>
+    <h1>{{ user.username }}'s Profile</h1>
+    <p>Email: {{ user.email }}</p>
+
+    <h2>Joined Communities</h2>
+    {% if communities %}
+        <ul>
+            {% for community in communities %}
+                <li>
+                    <a href="{{ url_for('community_routes.view_community', community_id=community.id) }}">
+                        {{ community.name }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You haven't joined any communities yet.</p>
+    {% endif %}
+
+    <h2>Your Posts</h2>
+    {% if posts %}
+        {% for post in posts %}
+            <div style="border:1px solid #ccc; margin-bottom:10px; padding:10px;">
+                <p><strong>In 
+                    <a href="{{ url_for('community_routes.view_community', community_id=post.community_id) }}">
+                        {{ post.community.name }}
+                    </a>
+                </strong> at {{ post.timestamp.strftime('%Y-%m-%d %H:%M') }}</p>
+                <p>{{ post.content }}</p>
+                {% if post.image_path %}
+                    <img src="{{ '/' + post.image_path }}" alt="Post Image" style="max-width:300px;">
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>You haven't posted anything yet.</p>
+    {% endif %}
+
+    <br>
+    <a href="{{ url_for('community_routes.list_communities') }}">← Back to Communities</a>
+</body>
+</html>

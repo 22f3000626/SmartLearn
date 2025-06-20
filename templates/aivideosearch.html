@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Video Recommendations - SmartLearn</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    .video-card img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+    }
+    .video-card {
+      transition: transform 0.2s ease;
+    }
+    .video-card:hover {
+      transform: scale(1.02);
+    }
+  </style>
+</head>
+<body class="bg-light">
+
+  <div class="container py-5">
+    <h1 class="mb-3 text-center">🎥 AI-Powered Video Recommendations</h1>
+    <p class="lead text-center text-muted">
+      Enter a topic and get high-quality YouTube videos, carefully ranked using advanced AI algorithms.
+    </p>
+
+    <!-- Search Form -->
+    <form method="POST" class="d-flex justify-content-center my-4">
+      <input type="text" name="topic" class="form-control w-50 me-2" placeholder="Enter a topic (e.g., Python, Machine Learning)" required />
+      <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+
+    <!-- Show Results -->
+    {% if videos %}
+      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mt-4">
+        {% for video in videos %}
+          <div class="col">
+            <div class="card video-card h-100 p-2">
+              <a href="{{ video.url }}" target="_blank">
+                <img src="{{ video.thumbnail }}" alt="Thumbnail for {{ video.title }}" />
+              </a>
+              <div class="card-body">
+                <h5 class="card-title">{{ video.title }}</h5>
+                <a href="{{ video.url }}" target="_blank" class="btn btn-sm btn-outline-primary">Watch on YouTube</a>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% elif searched %}
+      <div class="alert alert-warning text-center mt-4">
+        No videos found for <strong>{{ searched }}</strong>. Try a different topic.
+      </div>
+    {% endif %}
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

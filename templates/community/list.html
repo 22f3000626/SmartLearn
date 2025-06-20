@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Communities</title>
+</head>
+<body>
+    {% if community_created_success %}
+      <div style="background: #d4edda; color: #155724; border: 1px solid #c3e6cb; padding: 10px; border-radius: 4px; margin-bottom: 16px; text-align: center;">
+        Community created successfully!
+      </div>
+    {% endif %}
+    <h1>All Communities</h1>
+
+    <!-- 🔍 Search Form -->
+    <form method="GET" action="{{ url_for('community_routes.list_communities') }}">
+        <input type="text" name="q" placeholder="Search communities..." value="{{ query or '' }}">
+        <button type="submit">Search</button>
+        {% if query %}
+            <a href="{{ url_for('community_routes.list_communities') }}">Clear</a>
+        {% endif %}
+    </form>
+
+    <hr>
+
+    <ul>
+        {% for community in communities %}
+            <li>
+                <a href="{{ url_for('community_routes.view_community', community_id=community.id) }}">
+                    {{ community.name }}
+                </a>
+                - Created by User ID {{ community.created_by }}
+            </li>
+        {% else %}
+            <li>No communities found.</li>
+        {% endfor %}
+    </ul>
+
+    <br>
+    <a href="{{ url_for('community_routes.create_community') }}">+ Create New Community</a>
+</body>
+</html>

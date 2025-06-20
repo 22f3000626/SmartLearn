@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}{{ user.username }}'s Profile{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="card mx-auto" style="max-width: 400px;">
+        <div class="card-body text-center">
+            <img src="{{ url_for('static', filename=user.profile_pic or 'default_profile.png') }}" class="rounded-circle mb-3" width="120" height="120" alt="Profile Picture">
+            <h3>{{ user.username }}</h3>
+            <p class="text-muted">{{ user.email }}</p>
+            <p>{{ user.bio or 'No bio yet.' }}</p>
+            <hr>
+            <form method="POST" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="profile_pic" class="form-label">Change Profile Picture</label>
+                    <input type="file" class="form-control" id="profile_pic" name="profile_pic">
+                </div>
+                <div class="mb-3">
+                    <label for="bio" class="form-label">Edit Bio</label>
+                    <textarea class="form-control" id="bio" name="bio" rows="3">{{ user.bio }}</textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Update Profile</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 

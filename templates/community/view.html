@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}{{ community.name }}{% endblock %}
+{% block content %}
+
+<div class="container">
+    {% if community_created_success %}
+      <div style="background: #d4edda; color: #155724; border: 1px solid #c3e6cb; padding: 10px; border-radius: 4px; margin-bottom: 16px; text-align: center;">
+        Community created successfully!
+      </div>
+    {% endif %}
+    <h1 class="mb-3">{{ community.name }}</h1>
+    <p class="text-muted">{{ community.description }}</p>
+
+    {% if not is_member %}
+        <a href="{{ url_for('community_routes.join_community', community_id=community.id) }}" class="btn btn-primary mb-3">
+            Join Community
+        </a>
+        <p><em class="text-muted">You must join the community to post.</em></p>
+    {% else %}
+        <form action="{{ url_for('community_routes.leave_community', community_id=community.id) }}" method="get" class="mb-4">
+            <button type="submit" class="btn btn-danger">Leave Community</button>
+        </form>
+
+        <div class="mb-5">
+            <h4>Post Something</h4>
+            <form method="POST" action="{{ url_for('community_routes.post_to_community', community_id=community.id) }}" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <textarea name="content" class="form-control" rows="3" placeholder="What's on your mind?" required></textarea>
+                </div>
+                <div class="mb-3">
+                    <input type="file" name="image" class="form-control">
+                </div>
+                <button type="submit" class="btn btn-success">Post</button>
+            </form>
+        </div>
+    {% endif %}
+
+    <h4>Posts</h4>
+    {% for post in posts %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted d-flex align-items-center">
+                    <img src="{{ url_for('static', filename=post.author.profile_pic or 'default_profile.png') }}" class="rounded-circle me-2" width="32" height="32" alt="Profile Picture">
+                    <a href="{{ url_for('community_routes.user_profile', user_id=post.author.id) }}" class="fw-bold">{{ post.author.username }}</a>
+                    &bull; {{ post.timestamp.strftime('%Y-%m-%d %H:%M') }}
+                </h6>
+                <p class="card-text">{{ post.content }}</p>
+                {% if post.image_path %}
+                    <img src="/{{ post.image_path }}" alt="Post Image" class="img-fluid rounded">
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+
+    <a href="{{ url_for('community_routes.list_communities') }}" class="btn btn-secondary">← Back to Communities</a>
+</div>
+
+{% endblock %}

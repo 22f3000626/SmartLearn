@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}SmartLearn{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/">SmartLearn</a>
+        <div class="d-flex align-items-center">
+            <a class="btn btn-outline-light btn-sm me-2" href="{{ url_for('community_routes.my_communities') }}">My Communities</a>
+            {% if session.get('user_id') %}
+                <a class="d-flex align-items-center text-decoration-none text-light" href="{{ url_for('community_routes.user_profile', user_id=session['user_id']) }}">
+                    <img src="{{ url_for('static', filename=(g.user.profile_pic if g.user and g.user.profile_pic else 'default_profile.png')) }}" class="rounded-circle me-2" width="32" height="32" alt="Profile Picture">
+                    <span>{{ session['user'] }}</span>
+                </a>
+                <a class="btn btn-outline-light btn-sm ms-2" href="{{ url_for('main_routes.logout') }}">Logout</a>
+            {% else %}
+                <a class="btn btn-outline-light btn-sm me-2" href="{{ url_for('main_routes.login') }}">Login</a>
+                <a class="btn btn-outline-light btn-sm" href="{{ url_for('main_routes.signup') }}">Sign Up</a>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    {% block content %}{% endblock %}
+</div>
+
+</body>
+</html>

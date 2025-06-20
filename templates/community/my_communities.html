@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Communities</title>
+</head>
+<body>
+    <h1>Communities You've Joined</h1>
+
+    {% if communities %}
+        <ul>
+            {% for community in communities %}
+                <li>
+                    <a href="{{ url_for('community_routes.view_community', community_id=community.id) }}">
+                        {{ community.name }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You haven't joined any communities yet.</p>
+    {% endif %}
+
+    <br>
+    <a href="{{ url_for('community_routes.list_communities') }}">← Browse All Communities</a>
+</body>
+</html>

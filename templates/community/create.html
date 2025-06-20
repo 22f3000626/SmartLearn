@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Community</title>
+</head>
+<body>
+    <h1>Create a New Community</h1>
+    <form method="POST">
+        <label>Name:</label><br>
+        <input type="text" name="name" required><br><br>
+
+        <label>Description:</label><br>
+        <textarea name="description" rows="4" cols="50"></textarea><br><br>
+
+        <button type="submit">Create</button>
+    </form>
+    <br>
+    <a href="{{ url_for('community_routes.list_communities') }}">Back to communities</a>
+</body>
+</html>
