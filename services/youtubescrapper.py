@@ -17,11 +17,13 @@ def load_classifier():
             classifier = None
     return classifier
 
-def search_youtube(topic):
+def search_youtube(topic, limit=5, offset=0):
     """Search YouTube for educational videos on a given topic"""
-    logging.info(f"Searching YouTube for topic: {topic}")
+    logging.info(f"Searching YouTube for topic: {topic} (limit: {limit}, offset: {offset})")
     
-    query = f"ytsearch20:{topic} tutorial -shorts"
+    # Increase search results for pagination
+    search_count = max(20, (offset + limit) * 2)  # Get more results to account for filtering
+    query = f"ytsearch{search_count}:{topic} tutorial -shorts"
     ydl_opts = {
         'quiet': True,
         'skip_download': True,
@@ -124,11 +126,16 @@ def search_youtube(topic):
             video['score'] = 0.5  # Default score
             video['final_score'] = log(video['views'] + 1)
 
-    top_videos = sorted(candidates, key=lambda x: x['final_score'], reverse=True)[:5]
-    logging.info(f"Returning {len(top_videos)} top videos")
+    # Sort and apply pagination
+    sorted_videos = sorted(candidates, key=lambda x: x['final_score'], reverse=True)
+    start_index = offset
+    end_index = start_index + limit
+    top_videos = sorted_videos[start_index:end_index]
+    
+    logging.info(f"Returning {len(top_videos)} videos (offset: {offset}, limit: {limit})")
     
     # Log the final results for debugging
     for i, video in enumerate(top_videos):
-        logging.info(f"Top video {i+1}: {video['title'][:60]}... (score: {video.get('final_score', 0):.2f})")
+        logging.info(f"Video {offset + i + 1}: {video['title'][:60]}... (score: {video.get('final_score', 0):.2f})")
     
     return top_videos

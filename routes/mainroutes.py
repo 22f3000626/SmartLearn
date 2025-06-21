@@ -187,3 +187,36 @@ def ai_video_search():
         if topic:
             videos = search_youtube(topic)  # Use your existing YouTube search function
     return render_template("aivideosearch.html", videos=videos, searched=searched)
+
+@main_routes.route("/load-more-videos", methods=["POST"])
+def load_more_videos():
+    """AJAX endpoint to load more videos"""
+    try:
+        data = request.get_json()
+        topic = data.get("topic")
+        page = data.get("page", 1)
+        offset = (page - 1) * 5  # 5 videos per page
+        
+        if not topic:
+            return jsonify({"error": "Topic is required"}), 400
+        
+        # Get more videos with offset
+        videos = search_youtube(topic, limit=10, offset=offset)
+        
+        if videos:
+            return jsonify({
+                "success": True,
+                "videos": videos,
+                "has_more": len(videos) >= 5,
+                "next_page": page + 1
+            })
+        else:
+            return jsonify({
+                "success": True,
+                "videos": [],
+                "has_more": False,
+                "message": "No more videos found"
+            })
+            
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
