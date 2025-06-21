@@ -1,26 +1,220 @@
+<!-- user_profile.html - Modern User Profile Page -->
 {% extends 'base.html' %}
-{% block title %}{{ user.username }}'s Profile{% endblock %}
+{% block title %}{{ user.username }}'s Profile - SmartLearn{% endblock %}
 {% block content %}
-<div class="container">
-    <div class="card mx-auto" style="max-width: 400px;">
-        <div class="card-body text-center">
-            <img src="{{ url_for('static', filename=user.profile_pic or 'default_profile.png') }}" class="rounded-circle mb-3" width="120" height="120" alt="Profile Picture">
-            <h3>{{ user.username }}</h3>
-            <p class="text-muted">{{ user.email }}</p>
-            <p>{{ user.bio or 'No bio yet.' }}</p>
-            <hr>
-            <form method="POST" enctype="multipart/form-data">
-                <div class="mb-3">
-                    <label for="profile_pic" class="form-label">Change Profile Picture</label>
-                    <input type="file" class="form-control" id="profile_pic" name="profile_pic">
+<div class="container py-5">
+    <div class="row">
+        <!-- Profile Card -->
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-lg">
+                <div class="card-body text-center p-4">
+                    <!-- Profile Picture -->
+                    <div class="profile-picture-container mb-4">
+                        <img src="{{ url_for('static', filename=user.profile_pic or 'default_profile.png') }}" 
+                             class="profile-picture rounded-circle shadow" width="150" height="150" alt="Profile Picture">
+                    </div>
+                    
+                    <!-- User Info -->
+                    <h3 class="fw-bold mb-2">{{ user.username }}</h3>
+                    <p class="text-muted mb-3">
+                        <i class="fas fa-envelope me-2"></i>{{ user.email }}
+                    </p>
+                    
+                    <!-- Bio -->
+                    <div class="bio-section mb-4">
+                        <p class="text-muted">{{ user.bio or 'Learning enthusiast exploring new horizons.' }}</p>
+                    </div>
+                    
+                    <!-- Edit Profile Form (if own profile) -->
+                    {% if session.get('user_id') == user.id %}
+                    <div class="edit-profile-section">
+                        <button class="btn btn-primary mb-3" type="button" data-bs-toggle="collapse" 
+                                data-bs-target="#editProfile" aria-expanded="false">
+                            <i class="fas fa-edit me-2"></i>Edit Profile
+                        </button>
+                        
+                        <div class="collapse" id="editProfile">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body">
+                                    <form method="POST" enctype="multipart/form-data">
+                                        <div class="mb-3">
+                                            <label for="profile_pic" class="form-label fw-semibold">
+                                                <i class="fas fa-camera me-2"></i>Profile Picture
+                                            </label>
+                                            <input type="file" class="form-control" id="profile_pic" name="profile_pic" accept="image/*">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="bio" class="form-label fw-semibold">
+                                                <i class="fas fa-pen me-2"></i>Bio
+                                            </label>
+                                            <textarea class="form-control" id="bio" name="bio" rows="3" 
+                                                      placeholder="Tell others about yourself...">{{ user.bio }}</textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-success w-100">
+                                            <i class="fas fa-save me-2"></i>Update Profile
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
-                <div class="mb-3">
-                    <label for="bio" class="form-label">Edit Bio</label>
-                    <textarea class="form-control" id="bio" name="bio" rows="3">{{ user.bio }}</textarea>
+            </div>
+            
+            <!-- Quick Stats -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>Activity Summary
+                    </h6>
                 </div>
-                <button type="submit" class="btn btn-primary">Update Profile</button>
-            </form>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="stat-item">
+                                <h4 class="text-primary mb-0">{{ communities_joined|length }}</h4>
+                                <small class="text-muted">Communities</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="stat-item">
+                                <h4 class="text-success mb-0">{{ posts|length }}</h4>
+                                <small class="text-muted">Posts</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Communities Section -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-users me-2"></i>Communities
+                        <span class="badge bg-primary ms-2">{{ communities_joined|length }}</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if communities_joined %}
+                    <div class="row">
+                        {% for community in communities_joined %}
+                        <div class="col-md-6 mb-3">
+                            <a href="{{ url_for('community_routes.view_community', community_id=community.id) }}" class="text-decoration-none text-dark">
+                                <div class="d-flex align-items-center p-3 bg-light rounded h-100">
+                                    <div class="community-avatar me-3">
+                                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" 
+                                             style="width: 40px; height: 40px;">
+                                            {{ community.name[0].upper() }}
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-0">{{ community.name }}</h6>
+                                        <small class="text-muted">Member</small>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-users text-muted mb-3" style="font-size: 3rem;"></i>
+                        <p class="text-muted">No communities joined yet.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Posts Section -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-pen-alt me-2"></i>Recent Posts
+                        <span class="badge bg-success ms-2">{{ posts|length }}</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if posts %}
+                    {% for post in posts %}
+                    <div class="post-item border-bottom pb-4 mb-4">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h6 class="mb-0">
+                                <a href="{{ url_for('community_routes.view_community', community_id=post.community_id) }}" 
+                                   class="text-decoration-none">
+                                    <i class="fas fa-users me-1"></i>{{ post.community.name }}
+                                </a>
+                            </h6>
+                            <small class="text-muted">
+                                <i class="fas fa-clock me-1"></i>
+                                {{ post.timestamp.strftime('%b %d, %Y') }}
+                            </small>
+                        </div>
+                        <p class="text-muted mb-2">{{ post.content[:150] }}{% if post.content|length > 150 %}...{% endif %}</p>
+                        {% if post.image_path %}
+                        <div class="post-image mb-2">
+                            <img src="/{{ post.image_path }}" alt="Post Image" 
+                                 class="img-thumbnail" style="max-width: 200px; max-height: 150px; object-fit: cover;">
+                        </div>
+                        {% endif %}
+                        <a href="{{ url_for('community_routes.view_community', community_id=post.community_id) }}" 
+                           class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-eye me-1"></i>View in Community
+                        </a>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-pen-alt text-muted mb-3" style="font-size: 3rem;"></i>
+                        <p class="text-muted">No posts yet.</p>
+                        {% if session.get('user_id') == user.id %}
+                        <a href="{{ url_for('community_routes.list_communities') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Join a Community to Start Posting
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <a href="{{ url_for('community_routes.list_communities') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Communities
+            </a>
         </div>
     </div>
 </div>
-{% endblock %} 
+
+<style>
+.profile-picture {
+    border: 5px solid #fff;
+    object-fit: cover;
+    transition: all 0.3s ease;
+}
+
+.profile-picture:hover {
+    transform: scale(1.05);
+}
+
+.stat-item {
+    padding: 1rem 0;
+}
+
+.post-item:last-child {
+    border-bottom: none !important;
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+.community-avatar {
+    flex-shrink: 0;
+}
+</style>
+{% endblock %}

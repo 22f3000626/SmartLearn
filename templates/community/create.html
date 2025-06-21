@@ -1,20 +1,80 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Create Community</title>
-</head>
-<body>
-    <h1>Create a New Community</h1>
-    <form method="POST">
-        <label>Name:</label><br>
-        <input type="text" name="name" required><br><br>
+<!-- create_community.html - Modern Create Community Page -->
+{% extends 'base.html' %}
+{% block title %}Create Community - SmartLearn{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="text-center mb-5">
+                <i class="fas fa-users-cog text-primary mb-3" style="font-size: 4rem;"></i>
+                <h1 class="display-5 fw-bold mb-3">Create Your Community</h1>
+                <p class="lead text-muted">Build a space where learners can connect, share, and grow together</p>
+            </div>
 
-        <label>Description:</label><br>
-        <textarea name="description" rows="4" cols="50"></textarea><br><br>
+            <!-- Form Card -->
+            <div class="card border-0 shadow-lg">
+                <div class="card-body p-5">
+                    <form method="POST">
+                        <div class="mb-4">
+                            <label for="name" class="form-label fw-semibold h5">
+                                <i class="fas fa-tag me-2 text-primary"></i>Community Name
+                            </label>
+                            <input type="text" name="name" id="name" class="form-control form-control-lg" 
+                                   required placeholder="e.g., Python Developers, Digital Artists, Data Science Hub">
+                            <div class="form-text">Choose a clear, descriptive name that reflects your community's focus</div>
+                        </div>
 
-        <button type="submit">Create</button>
-    </form>
-    <br>
-    <a href="{{ url_for('community_routes.list_communities') }}">Back to communities</a>
-</body>
-</html>
+                        <div class="mb-4">
+                            <label for="description" class="form-label fw-semibold h5">
+                                <i class="fas fa-align-left me-2 text-primary"></i>Description
+                            </label>
+                            <textarea name="description" id="description" class="form-control" rows="6" 
+                                      placeholder="Describe what your community is about, what members can expect, and what topics you'll cover..."></textarea>
+                            <div class="form-text">Help potential members understand what makes your community special</div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="card bg-light h-100">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-lightbulb text-warning mb-2" style="font-size: 2rem;"></i>
+                                        <h6 class="fw-semibold">Pro Tips</h6>
+                                        <small class="text-muted">
+                                            • Use keywords in your name<br>
+                                            • Be specific about your focus<br>
+                                            • Set clear community guidelines
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card bg-light h-100">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-rocket text-success mb-2" style="font-size: 2rem;"></i>
+                                        <h6 class="fw-semibold">Get Started</h6>
+                                        <small class="text-muted">
+                                            • Invite your first members<br>
+                                            • Share valuable content<br>
+                                            • Engage with discussions
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg px-5 me-3">
+                                <i class="fas fa-plus me-2"></i>Create Community
+                            </button>
+                            <a href="{{ url_for('community_routes.list_communities') }}" class="btn btn-outline-secondary btn-lg px-4">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Communities
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

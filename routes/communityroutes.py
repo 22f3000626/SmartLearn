@@ -1,5 +1,5 @@
-from flask import Blueprint, render_template, request, redirect, url_for, session
-from models import db, Community, CommunityMembership, Post, User
+from flask import Blueprint, render_template, request, redirect, url_for, session, flash
+from models import db, Community, CommunityMembership, Post, User, PostLike, Comment
 from datetime import datetime
 from werkzeug.utils import secure_filename
 import os
@@ -14,8 +14,14 @@ def list_communities():
         communities = Community.query.filter(Community.name.ilike(f"%{query}%")).all()
     else:
         communities = Community.query.all()
+    
+    user_id = session.get("user_id")
+    memberships = []
+    if user_id:
+        memberships = [m.community_id for m in CommunityMembership.query.filter_by(user_id=user_id).all()]
+
     community_created_success = session.pop("community_created_success", None)
-    return render_template("community/list.html", communities=communities, query=query, community_created_success=community_created_success)
+    return render_template("community/list.html", communities=communities, query=query, community_created_success=community_created_success, memberships=memberships)
 
 # Route: Create a community
 @community_routes.route("/communities/create", methods=["GET", "POST"])
@@ -53,6 +59,7 @@ def join_community(community_id):
     if not already_member:
         db.session.add(CommunityMembership(user_id=user_id, community_id=community_id))
         db.session.commit()
+        flash(f"Congratulations! You have successfully joined the community.", "success")
 
     return redirect(url_for("community_routes.view_community", community_id=community_id))
 
@@ -102,9 +109,12 @@ def post_to_community(community_id):
     if image and image.filename:
         filename = secure_filename(image.filename)
         upload_folder = "static/uploads"
-        os.makedirs(upload_folder, exist_ok=True)
-        image_path = os.path.join(upload_folder, filename)
-        image.save(image_path)
+        # Ensure the upload folder exists
+        os.makedirs(os.path.join(os.getcwd(), upload_folder), exist_ok=True)
+        # Save the file
+        image.save(os.path.join(os.getcwd(), upload_folder, filename))
+        # Store the relative path for use in templates
+        image_path = f"uploads/{filename}"
 
     post = Post(
         content=content,
@@ -134,17 +144,79 @@ def my_communities():
 def user_profile(user_id):
     user = User.query.get_or_404(user_id)
     if request.method == "POST":
-        bio = request.form.get("bio")
+        # Ensure only the logged-in user can edit their own profile
+        if 'user_id' not in session or session['user_id'] != user.id:
+            return "You are not authorized to edit this profile.", 403
+
+        user.bio = request.form.get("bio", user.bio)
+        user.college_name = request.form.get("college_name", user.college_name)
+        user.qualification = request.form.get("qualification", user.qualification)
+        user.location = request.form.get("location", user.location)
+
         file = request.files.get("profile_pic")
-        if bio is not None:
-            user.bio = bio
         if file and file.filename:
             filename = secure_filename(file.filename)
             upload_folder = "static/profile_pics"
-            os.makedirs(upload_folder, exist_ok=True)
-            file_path = os.path.join(upload_folder, filename)
-            file.save(file_path)
+            os.makedirs(os.path.join(os.getcwd(), upload_folder), exist_ok=True)
+            file.save(os.path.join(os.getcwd(), upload_folder, filename))
             user.profile_pic = f"profile_pics/{filename}"
+        
         db.session.commit()
         return redirect(url_for("community_routes.user_profile", user_id=user.id))
-    return render_template("community/user_profile.html", user=user)
+
+    # Fetch communities the user has joined using a more direct query
+    communities_joined = db.session.query(Community).join(CommunityMembership).filter(CommunityMembership.user_id == user.id).all()
+
+    # Fetch the user's 10 most recent posts
+    posts = Post.query.filter_by(user_id=user.id).order_by(Post.timestamp.desc()).limit(10).all()
+    
+    return render_template("community/user_profile.html", user=user, communities_joined=communities_joined, posts=posts)
+
+@community_routes.route("/posts/<int:post_id>/like", methods=["POST"])
+def like_post(post_id):
+    user_id = session.get("user_id")
+    if not user_id:
+        return redirect("/login")
+    post = Post.query.get_or_404(post_id)
+    existing = PostLike.query.filter_by(user_id=user_id, post_id=post_id).first()
+    if existing:
+        existing.is_like = True
+    else:
+        db.session.add(PostLike(user_id=user_id, post_id=post_id, is_like=True))
+    db.session.commit()
+    return redirect(request.referrer or url_for("community_routes.view_community", community_id=post.community_id))
+
+@community_routes.route("/posts/<int:post_id>/dislike", methods=["POST"])
+def dislike_post(post_id):
+    user_id = session.get("user_id")
+    if not user_id:
+        return redirect("/login")
+    post = Post.query.get_or_404(post_id)
+    existing = PostLike.query.filter_by(user_id=user_id, post_id=post_id).first()
+    if existing:
+        existing.is_like = False
+    else:
+        db.session.add(PostLike(user_id=user_id, post_id=post_id, is_like=False))
+    db.session.commit()
+    return redirect(request.referrer or url_for("community_routes.view_community", community_id=post.community_id))
+
+# Route: Add a comment to a post
+@community_routes.route("/posts/<int:post_id>/comment", methods=["POST"])
+def add_comment(post_id):
+    user_id = session.get("user_id")
+    if not user_id:
+        flash("You must be logged in to comment.", "warning")
+        return redirect(url_for("main_routes.login"))
+
+    post = Post.query.get_or_404(post_id)
+    content = request.form.get("content")
+
+    if not content:
+        flash("Comment cannot be empty.", "danger")
+    else:
+        comment = Comment(content=content, user_id=user_id, post_id=post_id)
+        db.session.add(comment)
+        db.session.commit()
+        flash("Your comment has been added.", "success")
+
+    return redirect(request.referrer or url_for("community_routes.view_community", community_id=post.community_id))

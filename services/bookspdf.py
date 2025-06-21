@@ -1,25 +1,27 @@
 import requests
+import re
 from bs4 import BeautifulSoup
 
-def search_pdfs(topic):
-    search_query = f"{topic} filetype:pdf"
+def search_pdfs(topic, max_results=5):
+    query = f"{topic} filetype:pdf"
     headers = {
         "User-Agent": "Mozilla/5.0"
     }
-    params = {
-        "q": search_query
-    }
+    url = f"https://html.duckduckgo.com/html/?q={query}"
 
-    response = requests.get("https://html.duckduckgo.com/html/", params=params, headers=headers)
+    response = requests.get(url, headers=headers)
     soup = BeautifulSoup(response.text, "html.parser")
 
-    pdf_results = []
-    for result in soup.find_all("a", href=True):
-        href = result["href"]
-        if href.endswith(".pdf") and len(pdf_results) < 5:
-            pdf_results.append({
-                "title": result.get_text(strip=True) or "PDF File",
+    links = []
+    for a in soup.find_all("a", href=True):
+        href = a['href']
+        if href.lower().endswith(".pdf") and "http" in href:
+            title = a.get_text(strip=True)
+            links.append({
+                "title": title if title else href,
                 "link": href
             })
+        if len(links) >= max_results:
+            break
 
-    return pdf_results
+    return links

@@ -1,26 +1,137 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>My Communities</title>
-</head>
-<body>
-    <h1>Communities You've Joined</h1>
-
-    {% if communities %}
-        <ul>
-            {% for community in communities %}
-                <li>
-                    <a href="{{ url_for('community_routes.view_community', community_id=community.id) }}">
-                        {{ community.name }}
-                    </a>
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>You haven't joined any communities yet.</p>
+<!-- communities.html - Modern Communities List -->
+{% extends 'base.html' %}
+{% block title %}Communities - SmartLearn{% endblock %}
+{% block content %}
+<div class="container py-5">
+    {% if community_created_success %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            Community created successfully! Start inviting members.
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
     {% endif %}
 
-    <br>
-    <a href="{{ url_for('community_routes.list_communities') }}">← Browse All Communities</a>
-</body>
-</html>
+    <!-- Header Section -->
+    <div class="row mb-5">
+        <div class="col-md-8">
+            <h1 class="display-5 fw-bold mb-3">
+                <i class="fas fa-users text-primary me-3"></i>
+                Learning Communities
+            </h1>
+            <p class="lead text-muted">Join vibrant communities of learners sharing knowledge and growing together</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{{ url_for('community_routes.create_community') }}" class="btn btn-primary btn-lg">
+                <i class="fas fa-plus me-2"></i>Create Community
+            </a>
+        </div>
+    </div>
+
+    <!-- Search Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <form method="GET" action="{{ url_for('community_routes.list_communities') }}">
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text bg-light border-end-0">
+                                <i class="fas fa-search text-muted"></i>
+                            </span>
+                            <input type="text" name="q" class="form-control border-start-0" 
+                                   placeholder="Search communities by name or topic..." 
+                                   value="{{ query or '' }}">
+                            <button type="submit" class="btn btn-primary">Search</button>
+                            {% if query %}
+                                <a href="{{ url_for('community_routes.list_communities') }}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times"></i>
+                                </a>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Communities Grid -->
+    <div class="row">
+        {% for community in communities %}
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card h-100 border-0 shadow-sm community-card">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-start mb-3">
+                        <div class="community-avatar me-3">
+                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" 
+                                 style="width: 50px; height: 50px; font-size: 1.5rem;">
+                                {{ community.name[0].upper() }}
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h5 class="card-title mb-1">
+                                <a href="{{ url_for('community_routes.view_community', community_id=community.id) }}" 
+                                   class="text-decoration-none">
+                                    {{ community.name }}
+                                </a>
+                            </h5>
+                            <small class="text-muted">
+                                <i class="fas fa-user me-1"></i>
+                                Created by User {{ community.created_by }}
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <p class="card-text text-muted mb-3">
+                        {{ community.description[:100] }}{% if community.description|length > 100 %}...{% endif %}
+                    </p>
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="community-stats">
+                            <span class="badge bg-light text-dark">
+                                <i class="fas fa-users me-1"></i>
+                                {{ community.member_count or 0 }} members
+                            </span>
+                        </div>
+                        <a href="{{ url_for('community_routes.view_community', community_id=community.id) }}" 
+                           class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-arrow-right me-1"></i>Visit
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-search text-muted mb-3" style="font-size: 4rem;"></i>
+                <h3 class="text-muted">No communities found</h3>
+                <p class="text-muted mb-4">
+                    {% if query %}
+                        No communities match your search for "{{ query }}".
+                    {% else %}
+                        Be the first to create a learning community!
+                    {% endif %}
+                </p>
+                <a href="{{ url_for('community_routes.create_community') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Create First Community
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+.community-card {
+    transition: all 0.3s ease;
+}
+
+.community-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+}
+
+.community-avatar {
+    flex-shrink: 0;
+}
+</style>
+{% endblock %}

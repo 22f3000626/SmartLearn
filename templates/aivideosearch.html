@@ -1,62 +1,323 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>AI Video Recommendations - SmartLearn</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <style>
-    .video-card img {
-      max-width: 100%;
-      height: auto;
-      border-radius: 10px;
-    }
-    .video-card {
-      transition: transform 0.2s ease;
-    }
-    .video-card:hover {
-      transform: scale(1.02);
-    }
-  </style>
-</head>
-<body class="bg-light">
-
-  <div class="container py-5">
-    <h1 class="mb-3 text-center">🎥 AI-Powered Video Recommendations</h1>
-    <p class="lead text-center text-muted">
-      Enter a topic and get high-quality YouTube videos, carefully ranked using advanced AI algorithms.
-    </p>
-
-    <!-- Search Form -->
-    <form method="POST" class="d-flex justify-content-center my-4">
-      <input type="text" name="topic" class="form-control w-50 me-2" placeholder="Enter a topic (e.g., Python, Machine Learning)" required />
-      <button type="submit" class="btn btn-primary">Search</button>
-    </form>
-
-    <!-- Show Results -->
-    {% if videos %}
-      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mt-4">
-        {% for video in videos %}
-          <div class="col">
-            <div class="card video-card h-100 p-2">
-              <a href="{{ video.url }}" target="_blank">
-                <img src="{{ video.thumbnail }}" alt="Thumbnail for {{ video.title }}" />
-              </a>
-              <div class="card-body">
-                <h5 class="card-title">{{ video.title }}</h5>
-                <a href="{{ video.url }}" target="_blank" class="btn btn-sm btn-outline-primary">Watch on YouTube</a>
-              </div>
+<!-- ai_video_recommendations.html - Modern AI Video Recommendations Page -->
+{% extends 'base.html' %}
+{% block title %}AI Video Recommendations - SmartLearn{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <!-- Hero Section -->
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <div class="hero-content mb-4">
+                <div class="icon-container mb-4">
+                    <i class="fab fa-youtube text-danger" style="font-size: 4rem;"></i>
+                    <i class="fas fa-brain text-primary ms-2" style="font-size: 3rem;"></i>
+                </div>
+                <h1 class="display-4 fw-bold mb-3">
+                    <span style="background: linear-gradient(135deg, #ff0000 0%, #667eea 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                        AI-Powered
+                    </span>
+                    <span class="text-dark">Video Discovery</span>
+                </h1>
+                <p class="lead text-muted mb-4">
+                    Discover high-quality educational videos curated by advanced AI algorithms tailored to your learning needs
+                </p>
             </div>
-          </div>
-        {% endfor %}
-      </div>
-    {% elif searched %}
-      <div class="alert alert-warning text-center mt-4">
-        No videos found for <strong>{{ searched }}</strong>. Try a different topic.
-      </div>
-    {% endif %}
-  </div>
+        </div>
+    </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+    <!-- Search Section -->
+    <div class="row justify-content-center mb-5">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-lg search-card">
+                <div class="card-body p-4">
+                    <form method="POST">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-9">
+                                <label for="topic" class="form-label fw-semibold h5">
+                                    <i class="fas fa-search me-2 text-primary"></i>What would you like to learn?
+                                </label>
+                                <input type="text" name="topic" id="topic" class="form-control form-control-lg" 
+                                       placeholder="e.g., Python Programming, Machine Learning, Digital Marketing..." 
+                                       value="{{ searched or '' }}" required>
+                                <div class="form-text">
+                                    <i class="fas fa-lightbulb me-1"></i>
+                                    Try specific topics for better results
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <button type="submit" class="btn btn-primary btn-lg w-100">
+                                    <i class="fas fa-magic me-2"></i>Discover Videos
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if videos %}
+    <!-- Results Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <h3 class="fw-bold mb-1">
+                        <i class="fas fa-video me-2 text-primary"></i>
+                        Recommended Videos
+                    </h3>
+                    <p class="text-muted mb-0">
+                        Found {{ videos|length }} high-quality videos about "{{ searched }}"
+                    </p>
+                </div>
+                <div>
+                    <span class="badge bg-success fs-6">
+                        <i class="fas fa-robot me-1"></i>AI Curated
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Video Results Grid -->
+    <div class="row g-4">
+        {% for video in videos %}
+        <div class="col-lg-4 col-md-6">
+            <div class="card video-card h-100 border-0 shadow-sm">
+                <!-- Video Thumbnail -->
+                <div class="video-thumbnail-container">
+                    <a href="{{ video.url }}" target="_blank" class="text-decoration-none">
+                        <div class="position-relative">
+                            <img src="{{ video.thumbnail }}" alt="Thumbnail for {{ video.title }}" 
+                                 class="card-img-top video-thumbnail">
+                            <div class="play-overlay">
+                                <i class="fas fa-play-circle"></i>
+                            </div>
+                            <div class="video-badge">
+                                <i class="fab fa-youtube me-1"></i>YouTube
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                
+                <!-- Video Info -->
+                <div class="card-body p-4">
+                    <h5 class="card-title video-title mb-3">
+                        <a href="{{ video.url }}" target="_blank" class="text-decoration-none">
+                            {{ video.title }}
+                        </a>
+                    </h5>
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a href="{{ video.url }}" target="_blank" class="btn btn-primary btn-sm">
+                            <i class="fas fa-external-link-alt me-1"></i>Watch Now
+                        </a>
+                        <div class="video-actions">
+                            <button class="btn btn-outline-secondary btn-sm me-1" title="Save for later">
+                                <i class="fas fa-bookmark"></i>
+                            </button>
+                            <button class="btn btn-outline-secondary btn-sm" title="Share">
+                                <i class="fas fa-share"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Load More Section -->
+    <div class="row mt-5">
+        <div class="col-12 text-center">
+            <button class="btn btn-outline-primary btn-lg">
+                <i class="fas fa-plus me-2"></i>Load More Videos
+            </button>
+        </div>
+    </div>
+
+    {% elif searched %}
+    <!-- No Results -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-search text-muted mb-4" style="font-size: 4rem;"></i>
+                    <h4 class="text-muted mb-3">No Videos Found</h4>
+                    <p class="text-muted mb-4">
+                        We couldn't find any videos for "<strong>{{ searched }}</strong>". 
+                        Try using different keywords or a more general topic.
+                    </p>
+                    <div class="suggestions">
+                        <h6 class="fw-semibold mb-3">Try these popular topics:</h6>
+                        <div class="d-flex flex-wrap gap-2 justify-content-center">
+                            <span class="badge bg-light text-dark p-2 suggestion-tag" onclick="searchTopic('Python Programming')">
+                                Python Programming
+                            </span>
+                            <span class="badge bg-light text-dark p-2 suggestion-tag" onclick="searchTopic('Web Development')">
+                                Web Development
+                            </span>
+                            <span class="badge bg-light text-dark p-2 suggestion-tag" onclick="searchTopic('Data Science')">
+                                Data Science
+                            </span>
+                            <span class="badge bg-light text-dark p-2 suggestion-tag" onclick="searchTopic('Digital Marketing')">
+                                Digital Marketing
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if not videos and not searched %}
+    <!-- Getting Started Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm bg-light">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-graduation-cap text-primary mb-4" style="font-size: 4rem;"></i>
+                    <h4 class="fw-bold mb-3">Ready to Start Learning?</h4>
+                    <p class="text-muted mb-4">
+                        Enter any topic above and let our AI find the best educational videos for you
+                    </p>
+                    <div class="popular-topics">
+                        <h6 class="fw-semibold mb-3">Popular Learning Topics:</h6>
+                        <div class="d-flex flex-wrap gap-2 justify-content-center">
+                            <span class="badge bg-primary p-2 suggestion-tag" onclick="searchTopic('Machine Learning')">
+                                <i class="fas fa-robot me-1"></i>Machine Learning
+                            </span>
+                            <span class="badge bg-success p-2 suggestion-tag" onclick="searchTopic('JavaScript')">
+                                <i class="fab fa-js-square me-1"></i>JavaScript
+                            </span>
+                            <span class="badge bg-info p-2 suggestion-tag" onclick="searchTopic('Graphic Design')">
+                                <i class="fas fa-palette me-1"></i>Graphic Design
+                            </span>
+                            <span class="badge bg-warning p-2 suggestion-tag" onclick="searchTopic('Photography')">
+                                <i class="fas fa-camera me-1"></i>Photography
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.search-card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.video-card {
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.video-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.15) !important;
+}
+
+.video-thumbnail-container {
+    position: relative;
+    overflow: hidden;
+}
+
+.video-thumbnail {
+    aspect-ratio: 16/9;
+    object-fit: cover;
+    transition: all 0.3s ease;
+}
+
+.video-card:hover .video-thumbnail {
+    transform: scale(1.05);
+}
+
+.play-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 3rem;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.video-card:hover .play-overlay {
+    opacity: 0.9;
+}
+
+.video-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 0, 0, 0.9);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.video-title a {
+    color: #333;
+    font-weight: 600;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.video-title a:hover {
+    color: #667eea;
+}
+
+.suggestion-tag {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.suggestion-tag:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.hero-content {
+    animation: fadeInUp 1s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function searchTopic(topic) {
+    document.getElementById('topic').value = topic;
+    document.querySelector('form').submit();
+}
+
+// Add loading state to search button
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const button = form.querySelector('button[type="submit"]');
+    
+    form.addEventListener('submit', function() {
+        button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Searching...';
+        button.disabled = true;
+    });
+});
+</script>
+{% endblock %}

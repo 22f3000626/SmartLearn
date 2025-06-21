@@ -110,17 +110,6 @@ def search_videos():
     }
 
     return render_template("learn.html", results=results)
-@main_routes.route("/ai-videos", methods=["GET", "POST"])
-def ai_video_search():
-    videos = []
-    searched = None
-    if request.method == "POST":
-        topic = request.form.get("topic")
-        searched = topic
-        if topic:
-            videos = search_youtube(topic)  # This should return a list of {title, url, thumbnail}
-    return render_template("aivideosearch.html", videos=videos, searched=searched)
-
 
 # Create a new user
 @main_routes.route('/users', methods=['POST'])
@@ -187,3 +176,14 @@ def debug_users():
         {'id': u.id, 'username': u.username, 'email': u.email}
         for u in users
     ])
+
+@main_routes.route("/ai-videos", methods=["GET", "POST"])
+def ai_video_search():
+    videos = []
+    searched = None
+    if request.method == "POST":
+        topic = request.form.get("topic")
+        searched = topic
+        if topic:
+            results = search_youtube(topic)  # Use your existing YouTube search function
+    return render_template("aivideosearch.html",  videos=videos, searched=searched)

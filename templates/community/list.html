@@ -1,41 +1,157 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Communities</title>
-</head>
-<body>
-    {% if community_created_success %}
-      <div style="background: #d4edda; color: #155724; border: 1px solid #c3e6cb; padding: 10px; border-radius: 4px; margin-bottom: 16px; text-align: center;">
-        Community created successfully!
-      </div>
-    {% endif %}
-    <h1>All Communities</h1>
+<!-- my_communities.html - Modern My Communities Page -->
+{% extends 'base.html' %}
+{% block title %}My Communities - SmartLearn{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="row mb-5">
+        <div class="col-md-8">
+            <h1 class="display-5 fw-bold mb-3">
+                <i class="fas fa-user-friends text-primary me-3"></i>
+                My Communities
+            </h1>
+            <p class="lead text-muted">Communities you've joined and actively participate in</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{{ url_for('community_routes.list_communities') }}" class="btn btn-primary btn-lg">
+                <i class="fas fa-search me-2"></i>Discover More
+            </a>
+        </div>
+    </div>
 
-    <!-- 🔍 Search Form -->
-    <form method="GET" action="{{ url_for('community_routes.list_communities') }}">
-        <input type="text" name="q" placeholder="Search communities..." value="{{ query or '' }}">
-        <button type="submit">Search</button>
-        {% if query %}
-            <a href="{{ url_for('community_routes.list_communities') }}">Clear</a>
-        {% endif %}
-    </form>
-
-    <hr>
-
-    <ul>
+    {% if communities %}
+    <!-- Communities Grid -->
+    <div class="row">
         {% for community in communities %}
-            <li>
-                <a href="{{ url_for('community_routes.view_community', community_id=community.id) }}">
-                    {{ community.name }}
-                </a>
-                - Created by User ID {{ community.created_by }}
-            </li>
-        {% else %}
-            <li>No communities found.</li>
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100 border-0 shadow-sm community-card">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="community-avatar me-3">
+                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" 
+                                 style="width: 50px; height: 50px; font-size: 1.5rem;">
+                                {{ community.name[0].upper() }}
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h5 class="card-title mb-1">
+                                <a href="{{ url_for('community_routes.view_community', community_id=community.id) }}" 
+                                   class="text-decoration-none">
+                                    {{ community.name }}
+                                </a>
+                            </h5>
+                            <small class="text-muted">
+                                <i class="fas fa-users me-1"></i>
+                                {{ community.member_count or 0 }} members
+                            </small>
+                        </div>
+                        <div class="community-status">
+                            {% if community.id in memberships %}
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check me-1"></i>Joined
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <p class="card-text text-muted mb-3">
+                        {{ community.description[:120] }}{% if community.description|length > 120 %}...{% endif %}
+                    </p>
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="community-activity">
+                            <small class="text-muted">
+                                <i class="fas fa-clock me-1"></i>
+                                Last activity: Recently
+                            </small>
+                        </div>
+                        <a href="{{ url_for('community_routes.view_community', community_id=community.id) }}" 
+                           class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-arrow-right me-1"></i>Visit
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
         {% endfor %}
-    </ul>
+    </div>
 
-    <br>
-    <a href="{{ url_for('community_routes.create_community') }}">+ Create New Community</a>
-</body>
-</html>
+    <!-- Quick Stats -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm bg-light">
+                <div class="card-body p-4">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <div class="stat-item">
+                                <h3 class="text-primary mb-1">{{ communities|length }}</h3>
+                                <p class="text-muted mb-0">Communities Joined</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-item">
+                                <h3 class="text-success mb-1">0</h3>
+                                <p class="text-muted mb-0">Posts This Week</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-item">
+                                <h3 class="text-info mb-1">0</h3>
+                                <p class="text-muted mb-0">Comments Made</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-item">
+                                <h3 class="text-warning mb-1">0</h3>
+                                <p class="text-muted mb-0">Likes Received</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <!-- Empty State -->
+    <div class="row">
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-users text-muted mb-4" style="font-size: 5rem;"></i>
+                <h3 class="text-muted mb-3">No Communities Yet</h3>
+                <p class="text-muted mb-4">
+                    You haven't joined any communities yet. Discover amazing learning communities and connect with like-minded learners.
+                </p>
+                <div class="d-flex gap-3 justify-content-center">
+                    <a href="{{ url_for('community_routes.list_communities') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-search me-2"></i>Browse Communities
+                    </a>
+                    <a href="{{ url_for('community_routes.create_community') }}" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-plus me-2"></i>Create Community
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.community-card {
+    transition: all 0.3s ease;
+}
+
+.community-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+}
+
+.stat-item {
+    padding: 1rem 0;
+}
+
+.community-avatar {
+    flex-shrink: 0;
+}
+</style>
+{% endblock %}
