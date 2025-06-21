@@ -185,5 +185,5 @@ def ai_video_search():
         topic = request.form.get("topic")
         searched = topic
         if topic:
-            results = search_youtube(topic)  # Use your existing YouTube search function
-    return render_template("aivideosearch.html",  videos=videos, searched=searched)
+            videos = search_youtube(topic)  # Use your existing YouTube search function
+    return render_template("aivideosearch.html", videos=videos, searched=searched)

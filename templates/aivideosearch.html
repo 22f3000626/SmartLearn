@@ -78,6 +78,20 @@
         </div>
     </div>
 
+    <!-- Debug Information (remove in production) -->
+    {% if videos %}
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <strong>Debug Info:</strong> Found {{ videos|length }} videos. 
+                {% for video in videos[:2] %}
+                <br>Video {{ loop.index }}: {{ video.title[:50] }}... (URL: {{ video.url[:50] }}...)
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Video Results Grid -->
     <div class="row g-4">
         {% for video in videos %}
@@ -106,6 +120,17 @@
                             {{ video.title }}
                         </a>
                     </h5>
+                    
+                    <!-- Video Stats -->
+                    <div class="video-stats mb-3">
+                        <small class="text-muted">
+                            <i class="fas fa-clock me-1"></i>{{ video.duration_mins }} min
+                            <i class="fas fa-eye ms-3 me-1"></i>{{ "{:,}".format(video.views) }} views
+                            {% if video.likes %}
+                            <i class="fas fa-thumbs-up ms-3 me-1"></i>{{ "{:,}".format(video.likes) }} likes
+                            {% endif %}
+                        </small>
+                    </div>
                     
                     <div class="d-flex justify-content-between align-items-center">
                         <a href="{{ video.url }}" target="_blank" class="btn btn-primary btn-sm">
