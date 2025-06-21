@@ -1,0 +1,25 @@
+# SmartLearn Configuration
+# Copy this file to .env and modify the values as needed
+
+# Flask Configuration
+FLASK_SECRET_KEY=your-secret-key-here
+DATABASE_URL=sqlite:///smartlearn.db
+
+# AI Services Configuration
+ENABLE_AI_CLASSIFICATION=true
+ENABLE_OLLAMA=true
+OLLAMA_URL=http://localhost:11434
+
+# External APIs
+GOOGLE_BOOKS_API_ENABLED=true
+YOUTUBE_API_ENABLED=true
+
+# Logging Configuration
+LOG_LEVEL=INFO
+
+# Feature Flags
+ENABLE_COMMUNITY_FEATURES=true
+ENABLE_AI_VIDEO_SEARCH=true
+
+# Optional: PostgreSQL Configuration (if using PostgreSQL)
+# DATABASE_URL=postgresql://username:password@localhost:5432/smartlearn 

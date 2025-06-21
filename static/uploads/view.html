@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2>{{ community.name }}</h2>
+            <p>{{ community.description }}</p>
+            <p>Created by: 
+                {% if community.creator.profile_pic %}
+                    <img src="{{ url_for('static', filename='uploads/' + community.creator.profile_pic) }}" alt="Profile Picture" class="profile-pic-small rounded-circle">
+                {% endif %}
+                <a href="{{ url_for('community_routes.user_profile', user_id=community.creator.id) }}">{{ community.creator.username }}</a>
+            </p>
+        </div>
+        <div>
+            {% if g.user and g.user.id == community.creator_id %}
+                <!-- User is the creator, no action needed or maybe an edit button -->
+            {% elif g.user and g.user in community.members %}
+                <a href="{{ url_for('community_routes.leave_community', community_id=community.id) }}" class="btn btn-danger">Leave Community</a>
+            {% elif g.user %}
+                <a href="{{ url_for('community_routes.join_community', community_id=community.id) }}" class="btn btn-primary">Join Community</a>
+            {% else %}
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#loginSignupModal">
+                    Join Community
+                </button>
+            {% endif %}
+        </div>
+    </div>
+
+    <hr>
+
+    {# Show the form only to members #}
+    {% if is_member %}
+    <div class="post-form-container bg-light p-3 rounded mb-4">
+        <h4>Create a New Post</h4>
+        <form method="POST" action="{{ url_for('community_routes.post_to_community', community_id=community.id) }}" enctype="multipart/form-data">
+            <div class="mb-3">
+                <textarea class="form-control" name="content" rows="3" placeholder="What's on your mind?" required></textarea>
+            </div>
+            <div class="d-flex justify-content-end align-items-center gap-3 mt-2">
+                <label for="postImage" class="btn btn-outline-secondary mb-0">
+                    <i class="bi bi-paperclip"></i>
+                </label>
+                <input type="file" class="d-none" id="postImage" name="image" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.txt,.json,.ipynb">
+                <button type="submit" class="btn btn-success">Post</button>
+            </div>
+        </form>
+    </div>
+    {% endif %}
+
+    <h4>Posts</h4>
+    {% if session.user_id %}
+        {% if posts %}
+            {% for post in posts %}
+                <div class="card mb-3">
+                    {% if post.image_path %}
+                        {% set extension = post.image_path.split('.')[-1]|lower %}
+                        {% if extension in ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'] %}
+                            <img src="{{ url_for('static', filename=post.image_path) }}" class="card-img-top" alt="Post image">
+                        {% endif %}
+                    {% endif %}
+                    <div class="card-body">
+                        {% if post.image_path %}
+                            {% set extension = post.image_path.split('.')[-1]|lower %}
+                            {% if extension not in ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'] %}
+                                <div class="mb-3 p-2 border rounded">
+                                    <i class="bi bi-file-earmark-text me-2"></i>
+                                    <a href="{{ url_for('static', filename=post.image_path) }}" target="_blank" rel="noopener noreferrer">
+                                        {{ post.image_path.split('/')[-1] }}
+                                    </a>
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                        <p class="card-text">{{ post.content }}</p>
+                        
+                        <div class="like-dislike-container mb-3">
+                            <a href="{{ url_for('community_routes.like_post', post_id=post.id) }}" class="btn btn-sm btn-outline-success me-2">
+                                <i class="bi bi-hand-thumbs-up"></i> Like ({{ post.like_count }})
+                            </a>
+                            <a href="{{ url_for('community_routes.dislike_post', post_id=post.id) }}" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-hand-thumbs-down"></i> Dislike ({{ post.dislike_count }})
+                            </a>
+                        </div>
+                        
+                        <div class="d-flex align-items-center text-muted">
+                            <img src="{{ url_for('static', filename=post.author.profile_pic or 'profile_pics/default_profile.png') }}" alt="Profile Picture" class="rounded-circle me-2" width="24" height="24">
+                            <small>
+                                Posted by <strong><a href="{{ url_for('community_routes.user_profile', user_id=post.author.id) }}" class="text-dark">{{ post.author.username }}</a></strong>
+                                on {{ post.timestamp.strftime('%B %d, %Y') }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No posts in this community yet.</p>
+        {% endif %}
+    {% else %}
+        <div class="alert alert-info">Please <a href="{{ url_for('main_routes.login') }}">log in</a> to view posts in this community.</div>
+    {% endif %}
+</div>
+
+{% endblock %}

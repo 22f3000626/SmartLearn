@@ -1,22 +1,26 @@
 from flask import Flask, session, g
 from dotenv import load_dotenv
 import os
+import logging
 
 from extensions import db
 from flask_migrate import Migrate
 from models import User, Community, CommunityMembership, Post
+from config import Config
 
 # Load environment variables
 load_dotenv()
 
+# Configure logging
+logging.basicConfig(
+    level=getattr(logging, Config.LOG_LEVEL),
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+
 app = Flask(__name__)
 
-# Secret key
-app.secret_key = os.getenv("FLASK_SECRET_KEY", "fallback_secret_key")
-
-# Database configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///smartlearn.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# Apply configuration
+app.config.from_object(Config)
 
 # Initialize database and migrations
 db.init_app(app)

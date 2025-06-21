@@ -1,8 +1,21 @@
 from yt_dlp import YoutubeDL
-from transformers import pipeline
+import logging
 
-# Load zero-shot classifier
-classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
+# Initialize classifier as None, will be loaded on demand
+classifier = None
+
+def load_classifier():
+    """Load the AI classifier with error handling"""
+    global classifier
+    if classifier is None:
+        try:
+            from transformers import pipeline
+            classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
+            logging.info("AI classifier loaded successfully")
+        except Exception as e:
+            logging.warning(f"Failed to load AI classifier: {e}")
+            classifier = None
+    return classifier
 
 def search_youtube(topic):
     query = f"ytsearch20:{topic} tutorial -shorts"
@@ -13,9 +26,13 @@ def search_youtube(topic):
         'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4',
     }
 
-    with YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(query, download=False)
-        entries = info.get('entries', [])
+    try:
+        with YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(query, download=False)
+            entries = info.get('entries', [])
+    except Exception as e:
+        logging.error(f"YouTube search failed: {e}")
+        return []
 
     candidates = []
     for entry in entries:
@@ -59,17 +76,34 @@ def search_youtube(topic):
     if not candidates:
         return []
 
-    # AI-based scoring using zero-shot classification
-    titles = [video['title'] for video in candidates]
-    results = classifier(titles, candidate_labels=[topic], multi_label=False)
+    # Try AI-based scoring, fallback to view-based ranking if AI is unavailable
+    try:
+        ai_classifier = load_classifier()
+        if ai_classifier:
+            # AI-based scoring using zero-shot classification
+            titles = [video['title'] for video in candidates]
+            results = ai_classifier(titles, candidate_labels=[topic], multi_label=False)
 
-    for i, video in enumerate(candidates):
-        video['score'] = results[i]['scores'][0]  # confidence for the topic
+            for i, video in enumerate(candidates):
+                video['score'] = results[i]['scores'][0]  # confidence for the topic
 
-    # Final ranking: AI relevance score × log(views+1)
-    from math import log
-    for video in candidates:
-        video['final_score'] = video['score'] * log(video['views'] + 1)
+            # Final ranking: AI relevance score × log(views+1)
+            from math import log
+            for video in candidates:
+                video['final_score'] = video['score'] * log(video['views'] + 1)
+        else:
+            # Fallback: use view count for ranking
+            from math import log
+            for video in candidates:
+                video['score'] = 0.5  # Default score
+                video['final_score'] = log(video['views'] + 1)
+    except Exception as e:
+        logging.warning(f"AI scoring failed, using fallback ranking: {e}")
+        # Fallback: use view count for ranking
+        from math import log
+        for video in candidates:
+            video['score'] = 0.5  # Default score
+            video['final_score'] = log(video['views'] + 1)
 
     top_videos = sorted(candidates, key=lambda x: x['final_score'], reverse=True)[:5]
     return top_videos
