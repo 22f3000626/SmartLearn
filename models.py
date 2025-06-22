@@ -1,27 +1,21 @@
 from extensions import db
 from datetime import datetime
-
-# Existing User model
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
-    profile_pic = db.Column(db.String(255), nullable=True, default=None)  # Path to profile picture
-    bio = db.Column(db.Text, nullable=True, default="")  # User bio
+    profile_pic = db.Column(db.String(255), nullable=True, default=None) 
+    bio = db.Column(db.Text, nullable=True, default="") 
     college_name = db.Column(db.String(120), nullable=True)
     qualification = db.Column(db.String(120), nullable=True)
     location = db.Column(db.String(120), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-
-    # Relationships
     communities = db.relationship('CommunityMembership', back_populates='user', cascade="all, delete")
     posts = db.relationship('Post', backref='author', lazy=True)
 
     def __repr__(self):
         return f'<User {self.username}>'
-
-# New Community model
 class Community(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
@@ -35,8 +29,6 @@ class Community(db.Model):
 
     def __repr__(self):
         return f'<Community {self.name}>'
-
-# Link table: User <-> Community
 class CommunityMembership(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -48,8 +40,6 @@ class CommunityMembership(db.Model):
 
     def __repr__(self):
         return f'<Membership User:{self.user_id} -> Community:{self.community_id}>'
-
-# Posts within Communities
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.Text, nullable=False)
@@ -58,8 +48,6 @@ class Post(db.Model):
 
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     community_id = db.Column(db.Integer, db.ForeignKey('community.id'), nullable=False)
-
-    # Add this relationship
     likes = db.relationship('PostLike', backref='post', lazy='dynamic', cascade="all, delete-orphan")
 
     @property
@@ -72,16 +60,13 @@ class Post(db.Model):
 
     def __repr__(self):
         return f'<Post {self.id} by User:{self.user_id} in Community:{self.community_id}>'
-
 class PostLike(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
-    is_like = db.Column(db.Boolean, nullable=False)  # True for like, False for dislike
+    is_like = db.Column(db.Boolean, nullable=False)
 
     user = db.relationship('User', backref='post_likes')
-
-# New Comment model
 class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.Text, nullable=False)
