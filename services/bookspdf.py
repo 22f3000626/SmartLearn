@@ -1,17 +1,14 @@
 import requests
 import re
 from bs4 import BeautifulSoup
-
 def search_pdfs(topic, max_results=5):
     query = f"{topic} filetype:pdf"
     headers = {
         "User-Agent": "Mozilla/5.0"
     }
     url = f"https://html.duckduckgo.com/html/?q={query}"
-
     response = requests.get(url, headers=headers)
     soup = BeautifulSoup(response.text, "html.parser")
-
     links = []
     for a in soup.find_all("a", href=True):
         href = a['href']
@@ -23,5 +20,4 @@ def search_pdfs(topic, max_results=5):
             })
         if len(links) >= max_results:
             break
-
     return links

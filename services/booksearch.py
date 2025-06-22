@@ -1,5 +1,4 @@
 import requests
-
 def search_books(topic):
     url = f"https://www.googleapis.com/books/v1/volumes?q={topic}"
     response = requests.get(url).json()
