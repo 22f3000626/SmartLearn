@@ -78,7 +78,7 @@
                           enctype="multipart/form-data">
                         <div class="mb-3">
                             <textarea name="content" class="form-control" rows="4" 
-                                      placeholder="What's on your mind? Share knowledge, ask questions, or start a discussion..." 
+                                      placeholder="What's on your mind?" 
                                       required></textarea>
                         </div>
                         <div class="row">
@@ -108,13 +108,13 @@
 
                 {% for post in posts %}
                 <div class="card border-0 shadow-sm mb-4 post-card" id="post-{{ post.id }}">
-                    <!-- Post Image -->
                     {% if post.image_path and post.image_path.split('.')[-1]|lower in ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'] %}
                         <img src="{{ url_for('static', filename=post.image_path) }}" alt="Post Image" class="card-img-top">
                     {% endif %}
                     <div class="card-body p-4">
                         <!-- Post Header -->
                         <div class="d-flex align-items-center mb-3">
+                            {% if post.author %}
                             <img src="{{ url_for('static', filename=post.author.profile_pic or 'default_profile.png') }}" 
                                  class="rounded-circle me-3" width="45" height="45" alt="Profile">
                             <div class="flex-grow-1">
@@ -124,40 +124,39 @@
                                         {{ post.author.username }}
                                     </a>
                                 </h6>
-                                <small class="text-muted">
-                                    <i class="fas fa-clock me-1"></i>
-                                    {{ post.timestamp.strftime('%B %d, %Y at %I:%M %p') }}
-                                </small>
                             </div>
+                            {% else %}
+                            <img src="{{ url_for('static', filename='default_profile.png') }}" class="rounded-circle me-3" width="45" height="45">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-0 text-muted fw-semibold">[Deleted User]</h6>
+                            </div>
+                            {% endif %}
+                            <small class="text-muted ms-auto">
+                                <i class="fas fa-clock me-1"></i>{{ post.timestamp.strftime('%B %d, %Y at %I:%M %p') }}
+                            </small>
                         </div>
 
                         <!-- Post Content -->
-                        <div class="post-content mb-3">
-                            <p class="mb-0">{{ post.content }}</p>
-                        </div>
-                        
-                        <!-- File Attachment Link -->
+                        <p class="post-content mb-3">{{ post.content }}</p>
+
                         {% if post.image_path and post.image_path.split('.')[-1]|lower not in ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'] %}
                         <div class="mb-3 p-2 border rounded bg-light">
                             <i class="fas fa-file-alt me-2"></i>
-                            <a href="{{ url_for('static', filename=post.image_path) }}" target="_blank" rel="noopener noreferrer">
+                            <a href="{{ url_for('static', filename=post.image_path) }}" target="_blank">
                                 {{ post.image_path.split('/')[-1] }}
                             </a>
                         </div>
                         {% endif %}
 
                         <!-- Post Actions -->
-                        <div class="post-actions d-flex align-items-center">
+                        <div class="d-flex align-items-center">
                             <form method="POST" action="{{ url_for('community_routes.like_post', post_id=post.id) }}" class="me-2">
                                 <button type="submit" class="btn btn-outline-primary btn-sm">
                                     <i class="fas fa-thumbs-up me-1"></i>Like ({{ post.like_count }})
                                 </button>
                             </form>
-                            <button type="button" class="btn btn-outline-secondary btn-sm me-2" data-bs-toggle="collapse" data-bs-target="#reply-form-{{ post.id }}">
+                            <button class="btn btn-outline-secondary btn-sm me-2" data-bs-toggle="collapse" data-bs-target="#reply-form-{{ post.id }}">
                                 <i class="fas fa-reply me-1"></i>Reply
-                            </button>
-                            <button type="button" class="btn btn-outline-secondary btn-sm share-btn" data-bs-toggle="modal" data-bs-target="#shareModal" data-post-url="{{ url_for('community_routes.view_community', community_id=post.community_id, _anchor='post-' ~ post.id, _external=True) }}">
-                                <i class="fas fa-share me-1"></i>Share
                             </button>
                         </div>
 
@@ -171,15 +170,24 @@
                             </form>
                         </div>
 
-                        <!-- Comments Section -->
+                        <!-- Comments -->
                         <div class="comments-section mt-4">
                             {% for comment in post.comments|sort(attribute='timestamp', reverse=True) %}
                             <div class="d-flex mb-3">
-                                <img src="{{ url_for('static', filename=comment.author.profile_pic or 'default_profile.png') }}" class="rounded-circle me-2" width="30" height="30">
+                                {% if comment.author %}
+                                <img src="{{ url_for('static', filename=comment.author.profile_pic or 'default_profile.png') }}" 
+                                     class="rounded-circle me-2" width="30" height="30">
                                 <div class="bg-light p-2 rounded w-100">
                                     <strong>{{ comment.author.username }}</strong>
                                     <p class="mb-0 small">{{ comment.content }}</p>
                                 </div>
+                                {% else %}
+                                <img src="{{ url_for('static', filename='default_profile.png') }}" class="rounded-circle me-2" width="30" height="30">
+                                <div class="bg-light p-2 rounded w-100">
+                                    <strong class="text-muted">[Deleted User]</strong>
+                                    <p class="mb-0 small">{{ comment.content }}</p>
+                                </div>
+                                {% endif %}
                             </div>
                             {% endfor %}
                         </div>
@@ -193,7 +201,7 @@
                         {% if is_member %}
                             Be the first to share something with this community!
                         {% else %}
-                            Join the community to see and participate in discussions.
+                            Join the community to participate.
                         {% endif %}
                     </p>
                 </div>
@@ -203,37 +211,29 @@
 
         <!-- Sidebar -->
         <div class="col-lg-4">
-            <!-- Community Stats -->
+            <!-- Stats & Actions -->
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-light">
-                    <h6 class="mb-0">
-                        <i class="fas fa-chart-bar me-2"></i>Community Stats
-                    </h6>
+                    <h6 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Community Stats</h6>
                 </div>
                 <div class="card-body">
                     <div class="row text-center">
                         <div class="col-6">
-                            <div class="stat-item">
-                                <h4 class="text-primary mb-0">{{ posts|length }}</h4>
-                                <small class="text-muted">Posts</small>
-                            </div>
+                            <h4 class="text-primary mb-0">{{ posts|length }}</h4>
+                            <small class="text-muted">Posts</small>
                         </div>
                         <div class="col-6">
-                            <div class="stat-item">
-                                <h4 class="text-success mb-0">{{ community.member_count or 0 }}</h4>
-                                <small class="text-muted">Members</small>
-                            </div>
+                            <h4 class="text-success mb-0">{{ community.member_count or 0 }}</h4>
+                            <small class="text-muted">Members</small>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Quick Actions -->
+            <!-- Quick Links -->
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-light">
-                    <h6 class="mb-0">
-                        <i class="fas fa-bolt me-2"></i>Quick Actions
-                    </h6>
+                    <h6 class="mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h6>
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
@@ -252,69 +252,4 @@
     </div>
 </div>
 
-<style>
-.post-card {
-    transition: all 0.3s ease;
-}
-
-.post-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
-}
-
-.stat-item {
-    padding: 1rem 0;
-}
-</style>
-
-<!-- Share Modal -->
-<div class="modal fade" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="shareModalLabel">Share Post</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p>Copy the link below to share this post:</p>
-                <div class="input-group">
-                    <input type="text" id="shareLinkInput" class="form-control" value="" readonly>
-                    <button class="btn btn-primary" id="copyLinkBtn">
-                        <i class="fas fa-copy me-1"></i>Copy
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-{% block scripts %}
-<script>
-const shareModal = document.getElementById('shareModal');
-const shareLinkInput = document.getElementById('shareLinkInput');
-const copyLinkBtn = document.getElementById('copyLinkBtn');
-
-shareModal.addEventListener('show.bs.modal', event => {
-    // Button that triggered the modal
-    const button = event.relatedTarget;
-    // Extract info from data-bs-* attributes
-    const postUrl = button.getAttribute('data-post-url');
-    // Update the modal's content.
-    shareLinkInput.value = postUrl;
-});
-
-copyLinkBtn.addEventListener('click', () => {
-    shareLinkInput.select();
-    navigator.clipboard.writeText(shareLinkInput.value).then(() => {
-        const originalText = copyLinkBtn.innerHTML;
-        copyLinkBtn.innerHTML = '<i class="fas fa-check me-1"></i>Copied!';
-        setTimeout(() => {
-            copyLinkBtn.innerHTML = originalText;
-        }, 2000);
-    }).catch(err => {
-        console.error('Failed to copy text: ', err);
-    });
-});
-</script>
-{% endblock %}
 {% endblock %}

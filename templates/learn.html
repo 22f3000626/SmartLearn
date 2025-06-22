@@ -1,4 +1,4 @@
-<!-- learn.html - Modern Learning Interface -->
+<!-- learn.html - Modern Learning Interface with Elegant Roadmap -->
 {% extends 'base.html' %}
 {% block title %}Learn - SmartLearn{% endblock %}
 {% block content %}
@@ -52,18 +52,49 @@
     </div>
 
     {% if results.roadmap %}
-    <!-- Learning Roadmap -->
+    <!-- Elegant Learning Roadmap -->
     <div class="row mb-5">
         <div class="col-12">
-            <div class="card border-0 shadow">
-                <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                    <h4 class="mb-0">
-                        <i class="fas fa-route me-2"></i>Your Personalized Learning Roadmap
-                    </h4>
+            <div class="roadmap-container">
+                <!-- Roadmap Header -->
+                <div class="roadmap-header">
+                    <div class="roadmap-icon">
+                        <i class="fas fa-route"></i>
+                    </div>
+                    <div class="roadmap-title">
+                        <h3 class="mb-2">Your Personalized Learning Journey</h3>
+                        <p class="text-muted mb-0">Follow this curated path to master your chosen topic</p>
+                    </div>
+                    <div class="roadmap-badge">
+                        <span class="badge bg-success">
+                            <i class="fas fa-robot me-1"></i>AI Generated
+                        </span>
+                    </div>
                 </div>
-                <div class="card-body p-4">
-                    <div class="roadmap-content">
-                        {{ results.roadmap|safe }}
+
+                <!-- Roadmap Content -->
+                <div class="roadmap-body">
+                    <div class="roadmap-timeline">
+                        <div class="roadmap-content-wrapper">
+                            {{ results.roadmap|safe }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Roadmap Progress -->
+                <div class="roadmap-footer">
+                    <div class="progress-container">
+                        <div class="progress-info">
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Start your journey and track your progress as you learn
+                            </small>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -180,6 +211,235 @@
 </div>
 
 <style>
+/* Elegant Roadmap Styles */
+.roadmap-container {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.roadmap-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.roadmap-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    0%, 100% { transform: translateX(-100%) translateY(-100%); }
+    50% { transform: translateX(-50%) translateY(-50%); }
+}
+
+.roadmap-icon {
+    background: rgba(255,255,255,0.2);
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    backdrop-filter: blur(10px);
+    flex-shrink: 0;
+}
+
+.roadmap-title {
+    flex-grow: 1;
+}
+
+.roadmap-title h3 {
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.roadmap-badge {
+    align-self: flex-start;
+}
+
+.roadmap-badge .badge {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+}
+
+.roadmap-body {
+    padding: 0;
+}
+
+.roadmap-timeline {
+    position: relative;
+    padding: 2rem;
+}
+
+.roadmap-timeline::before {
+    content: '';
+    position: absolute;
+    left: 40px;
+    top: 2rem;
+    bottom: 2rem;
+    width: 3px;
+    background: linear-gradient(to bottom, #667eea, #764ba2);
+    border-radius: 10px;
+}
+
+.roadmap-content-wrapper {
+    position: relative;
+    margin-left: 3rem;
+    padding: 1.5rem 2rem;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    border-left: 4px solid #667eea;
+}
+
+.roadmap-content-wrapper::before {
+    content: '';
+    position: absolute;
+    left: -2.2rem;
+    top: 2rem;
+    width: 12px;
+    height: 12px;
+    background: #667eea;
+    border-radius: 50%;
+    border: 3px solid white;
+    box-shadow: 0 0 0 3px #667eea;
+}
+
+/* Enhanced content styling */
+.roadmap-content-wrapper h1 {
+    color: #2d3748;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e2e8f0;
+    position: relative;
+}
+
+.roadmap-content-wrapper h1::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.roadmap-content-wrapper h2 {
+    color: #4a5568;
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin: 2rem 0 1rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.roadmap-content-wrapper h2::before {
+    content: '▶';
+    color: #667eea;
+    font-size: 0.8rem;
+}
+
+.roadmap-content-wrapper h3 {
+    color: #2d3748;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 1.5rem 0 0.8rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.roadmap-content-wrapper h3::before {
+    content: '•';
+    color: #764ba2;
+    font-size: 1.2rem;
+}
+
+.roadmap-content-wrapper ul {
+    padding-left: 0;
+    list-style: none;
+    margin-bottom: 1.5rem;
+}
+
+.roadmap-content-wrapper li {
+    position: relative;
+    padding: 0.8rem 0 0.8rem 2rem;
+    margin-bottom: 0.5rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 3px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+.roadmap-content-wrapper li:hover {
+    background: #e8f4f8;
+    border-left-color: #667eea;
+    transform: translateX(5px);
+}
+
+.roadmap-content-wrapper li::before {
+    content: '✓';
+    position: absolute;
+    left: 0.8rem;
+    top: 0.8rem;
+    color: #48bb78;
+    font-weight: bold;
+}
+
+.roadmap-content-wrapper p {
+    color: #4a5568;
+    line-height: 1.7;
+    margin-bottom: 1rem;
+}
+
+.roadmap-content-wrapper strong {
+    color: #2d3748;
+    font-weight: 600;
+}
+
+.roadmap-footer {
+    background: rgba(255,255,255,0.8);
+    padding: 1.5rem 2rem;
+    border-top: 1px solid rgba(255,255,255,0.3);
+    backdrop-filter: blur(10px);
+}
+
+.progress-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.progress-info {
+    flex-grow: 1;
+}
+
+.progress-bar-container {
+    flex-shrink: 0;
+    width: 200px;
+}
+
+/* Video card styles */
 .video-card {
     transition: all 0.3s ease;
     border-right: 1px solid #eee;
@@ -199,23 +459,35 @@
     color: #667eea;
 }
 
-.roadmap-content {
-    font-size: 1.1rem;
-    line-height: 1.6;
-}
-
-.roadmap-content h1, .roadmap-content h2, .roadmap-content h3 {
-    color: #667eea;
-    margin-top: 1.5rem;
-    margin-bottom: 1rem;
-}
-
-.roadmap-content ul {
-    padding-left: 1.5rem;
-}
-
-.roadmap-content li {
-    margin-bottom: 0.5rem;
+/* Responsive design */
+@media (max-width: 768px) {
+    .roadmap-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+    
+    .roadmap-timeline::before {
+        left: 20px;
+    }
+    
+    .roadmap-content-wrapper {
+        margin-left: 1.5rem;
+        padding: 1rem;
+    }
+    
+    .roadmap-content-wrapper::before {
+        left: -1.4rem;
+    }
+    
+    .progress-container {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .progress-bar-container {
+        width: 100%;
+    }
 }
 </style>
 {% endblock %}
