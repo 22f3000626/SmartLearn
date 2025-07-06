@@ -1,6 +1,6 @@
 from extensions import db
 from datetime import datetime
-import time
+import os
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
